@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:get/get.dart';
 
 import '../../model/deal_model.dart';
@@ -13,24 +15,44 @@ class SearchDealsController extends GetxController {
   final isLoading = false.obs;
   final hasSearched = false.obs;
 
+  Timer? debounce;
+  String latestQuery = '';
+
+  @override
+  void onClose() {
+    debounce?.cancel();
+    super.onClose();
+  }
+
   void onQueryChanged(String query) {
-    _search(query);
+    latestQuery = query.trim();
+
+    if (latestQuery.isEmpty) {
+      results.clear();
+      hasSearched.value = false;
+      isLoading.value = false;
+      return;
+    }
+
+    debounce?.cancel();
+    debounce = Timer(
+      const Duration(milliseconds: 300),
+      () => _search(latestQuery),
+    );
   }
 
   Future<void> _search(String query) async {
-    if (query.trim().isEmpty) {
-      results.clear();
-      hasSearched.value = false;
-      return;
-    }
     isLoading.value = true;
     hasSearched.value = true;
+
     try {
       final found = await dealRepo.search(query);
+      if (query != latestQuery) return;
       results.assignAll(found);
     } catch (e) {
       LogService.error('search failed', e);
+    } finally {
+      isLoading.value = false;
     }
-    isLoading.value = false;
   }
 }
