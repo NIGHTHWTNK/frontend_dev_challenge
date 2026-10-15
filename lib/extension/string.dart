@@ -1,6 +1,4 @@
 String formatCountdown(Duration remainingDuration) {
-  if (remainingDuration.isNegative) return 'Expired';
-
   final int hours = remainingDuration.inHours;
   final int minutes = remainingDuration.inMinutes.remainder(60);
   final int seconds = remainingDuration.inSeconds.remainder(60);
