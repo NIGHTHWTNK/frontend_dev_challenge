@@ -23,25 +23,46 @@ class DealDetailsController extends GetxController {
   int? get quantityLeft => _quantityLeft.value;
 
   Worker? _cartWorker;
+  final isLoading = true.obs;
 
   @override
   void onInit() {
     super.onInit();
-    deal = Get.arguments as DealModel;
-    _quantityLeft.value = deal.quantityLeft;
-    analytics.logEvent('deal_details_view', {
-      'deal_id': deal.id,
-      'source': Get.parameters['source'] ?? 'unknown',
-    });
-    // Whenever the cart changes, re-check this deal's remaining stock so the
-    // details screen never shows stale availability.
-    _cartWorker = ever(cartService.itemCount, (_) => _recheckAvailability());
+    _initializeDeal();
   }
 
   @override
   void onClose() {
     _cartWorker?.dispose();
     super.onClose();
+  }
+
+  Future<void> _initializeDeal() async {
+    try {
+      final args = Get.arguments;
+
+      if (args is DealModel) {
+        deal = args;
+      } else {
+        final id = int.tryParse(Get.parameters['id'] ?? '');
+        if (id == null) {
+          Get.back();
+          return;
+        }
+        deal = await dealRepo.fetchById(id);
+      }
+
+      _quantityLeft.value = deal.quantityLeft;
+      analytics.logEvent('deal_details_view', {
+        'deal_id': deal.id,
+        'source': Get.parameters['source'] ?? 'unknown',
+      });
+      _cartWorker = ever(cartService.itemCount, (_) => _recheckAvailability());
+    } catch (e) {
+      LogService.error('Failed to load deal', e);
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   Future<void> _recheckAvailability() async {
