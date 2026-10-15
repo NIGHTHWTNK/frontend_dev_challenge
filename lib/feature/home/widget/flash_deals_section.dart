@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:rescu/feature/home/widget/count_down_text.dart';
 
 import '../../../app_config.dart';
 import '../../../model/deal_model.dart';
@@ -84,18 +85,14 @@ class FlashDealsSection extends StatelessWidget {
                                           color: AppConfig.primaryGreen)),
                                   const Spacer(),
                                   Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 6, vertical: 2),
-                                    decoration: BoxDecoration(
-                                      color: Colors.red.shade50,
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Text('Ends soon',
-                                        style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.w600,
-                                            color: Colors.red.shade700)),
-                                  ),
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 6, vertical: 2),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red.shade50,
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: CountdownText(
+                                          endsAt: deal.flashSaleEndsAt)),
                                 ],
                               ),
                             ],
